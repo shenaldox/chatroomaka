@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <style>
-        /* --- RESET & VARIABLES --- */
+        /* --- CSS (Same as before, kept for consistency) --- */
         :root {
             --primary: #4e54c8;
             --secondary: #8f94fb;
@@ -43,7 +43,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* --- CHAT CONTAINER (GLASSMORPHISM) --- */
         .chat-container {
             width: 90%;
             max-width: 500px;
@@ -60,7 +59,6 @@
             position: relative;
         }
 
-        /* --- HEADER --- */
         .chat-header {
             padding: 15px 20px;
             background: rgba(0, 0, 0, 0.2);
@@ -80,7 +78,6 @@
         }
         .header-actions button:hover { color: #fff; }
 
-        /* --- MESSAGES AREA --- */
         .chat-messages {
             flex: 1;
             padding: 20px;
@@ -91,12 +88,10 @@
             scroll-behavior: smooth;
         }
 
-        /* Custom Scrollbar */
         .chat-messages::-webkit-scrollbar { width: 6px; }
         .chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
         .chat-messages::-webkit-scrollbar-track { background: transparent; }
 
-        /* Message Bubbles */
         .message {
             max-width: 80%;
             display: flex;
@@ -127,7 +122,6 @@
             align-items: center;
         }
 
-        /* My Messages */
         .message.mine { align-self: flex-end; align-items: flex-end; }
         .message.mine .message-content {
             background: var(--my-msg-bg);
@@ -136,7 +130,6 @@
             box-shadow: 0 4px 15px rgba(78, 84, 200, 0.3);
         }
 
-        /* Other Messages */
         .message.others { align-self: flex-start; align-items: flex-start; }
         .message.others .message-content {
             background: var(--other-msg-bg);
@@ -146,7 +139,6 @@
         }
         .sender-name { font-weight: 600; color: var(--accent); font-size: 0.75rem; margin-bottom: 2px; }
 
-        /* System Messages */
         .message.system {
             align-self: center;
             max-width: 100%;
@@ -160,8 +152,12 @@
             color: #aaa;
             border: none;
         }
+        .message.error .message-content {
+            background: rgba(255, 50, 50, 0.2);
+            color: #ffadad;
+            border: 1px solid rgba(255, 50, 50, 0.3);
+        }
 
-        /* --- INPUT AREA --- */
         .chat-input-area {
             padding: 15px 20px;
             background: rgba(0, 0, 0, 0.2);
@@ -206,7 +202,6 @@
         .send-btn:hover { transform: rotate(-10deg) scale(1.1); }
         .send-btn i { font-size: 1rem; }
 
-        /* --- MODAL (USERNAME) --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8);
@@ -230,13 +225,12 @@
             font-weight: bold; cursor: pointer;
         }
 
-        /* --- EMOJI PICKER (SIMPLE) --- */
         .emoji-picker {
             position: absolute; bottom: 70px; left: 20px;
             background: rgba(20, 20, 40, 0.95);
             padding: 10px; border-radius: 10px;
             display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;
-            display: none; /* Hidden by default */
+            display: none;
             border: 1px solid var(--glass-border);
         }
         .emoji-picker span { font-size: 1.5rem; cursor: pointer; text-align: center; }
@@ -253,15 +247,14 @@
     <div class="modal-overlay" id="usernameModal">
         <div class="modal-content">
             <h2>Join the Chat</h2>
-            <p style="margin-bottom: 15px; color: #ccc;">Enter a display name to start chatting with the class.</p>
-            <input type="text" id="usernameInput" placeholder="Your Name (e.g., John)" maxlength="15">
-            <button class="modal-btn" onclick="joinChat()">Enter Chatroom</button>
+            <p style="margin-bottom: 15px; color: #ccc;">Enter a display name to start chatting.</p>
+            <input type="text" id="usernameInput" placeholder="Your Name" maxlength="15">
+            <button class="modal-btn" id="joinBtn">Enter Chatroom</button>
         </div>
     </div>
 
     <!-- Main Chat Interface -->
     <div class="chat-container">
-        <!-- Header -->
         <div class="chat-header">
             <div class="chat-info">
                 <h3>English Class 📚</h3>
@@ -273,15 +266,12 @@
             </div>
         </div>
 
-        <!-- Messages -->
         <div class="chat-messages" id="messageList">
-            <!-- Messages will be injected here by JS -->
             <div class="message system">
-                <div class="message-content">Welcome to the public chatroom! Be respectful.</div>
+                <div class="message-content">Welcome! Please configure Firebase to chat.</div>
             </div>
         </div>
 
-        <!-- Emoji Picker -->
         <div class="emoji-picker" id="emojiPicker">
             <span onclick="addEmoji('😊')">😊</span>
             <span onclick="addEmoji('👍')">👍</span>
@@ -295,68 +285,74 @@
             <span onclick="addEmoji('🔥')">🔥</span>
         </div>
 
-        <!-- Input Area -->
         <div class="chat-input-area">
             <button class="emoji-btn" onclick="toggleEmoji()"><i class="far fa-smile"></i></button>
             <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off">
-            <button class="send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
-
-    <!-- Sound Effect (Base64) -->
-    <!-- A simple pop sound -->
-    <audio id="msgSound" src="data:audio/wav;base64,UklGRl9vT1BXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"></audio>
 
     <!-- FIREBASE SDKs -->
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+        import { getDatabase, ref, push, set, onChildAdded, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
         // ==========================================
-        // 🔥 CONFIGURATION (REPLACE THIS SECTION)
+        // 🔥 PASTE YOUR FIREBASE CONFIG HERE
         // ==========================================
         const firebaseConfig = {
-            // PASTE YOUR FIREBASE CONFIG HERE
-            // Example:
-            // apiKey: "AIzaSy...",
-            // authDomain: "your-project.firebaseapp.com",
-            // databaseURL: "https://your-project-default-rtdb.firebaseio.com",
-            // projectId: "your-project",
-            // storageBucket: "your-project.appspot.com",
-            // messagingSenderId: "...",
-            // appId: "..."
+            // REPLACE THE ENTIRE OBJECT BELOW WITH YOUR CONFIG
+            apiKey: "REPLACE_ME",
+            authDomain: "REPLACE_ME",
+            databaseURL: "REPLACE_ME",
+            projectId: "REPLACE_ME",
+            storageBucket: "REPLACE_ME",
+            messagingSenderId: "REPLACE_ME",
+            appId: "REPLACE_ME"
         };
-        
-        // Fallback config to prevent crash before setup (Demo Mode)
-        // REMOVE THESE LINES when you paste your real config
-        if(!firebaseConfig.apiKey) {
-           console.warn("Firebase not configured. Chat is in demo mode (local only).");
-        } else {
-            // Initialize Firebase
-            const app = initializeApp(firebaseConfig);
-            const db = getDatabase(app);
-            const messagesRef = ref(db, 'messages');
-        }
 
         // --- GLOBAL VARIABLES ---
         let username = localStorage.getItem('chat_username');
         let soundEnabled = true;
         const messageList = document.getElementById('messageList');
         const messageInput = document.getElementById('messageInput');
-        const msgSound = document.getElementById('msgSound');
+        const msgSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.m4a'); // Simple pop sound
 
-        // --- INITIALIZATION ---
-        window.onload = () => {
+        // --- INITIALIZATION & LOGIC ---
+        let app, db, messagesRef;
+
+        function initFirebase() {
+            // Check if config is valid
+            if (firebaseConfig.apiKey === "REPLACE_ME") {
+                renderSystemMessage("⚠️ Error: Please edit the code and replace 'REPLACE_ME' with your actual Firebase Config keys.", true);
+                return false;
+            }
+
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getDatabase(app);
+                messagesRef = ref(db, 'messages');
+                return true;
+            } catch (error) {
+                renderSystemMessage("⚠️ Firebase Error: " + error.message, true);
+                console.error(error);
+                return false;
+            }
+        }
+
+        // Check Init on Load
+        const isConfigured = initFirebase();
+
+        window.addEventListener('DOMContentLoaded', () => {
             if (username) {
                 document.getElementById('usernameModal').style.display = 'none';
-                if(typeof messagesRef !== 'undefined') loadMessages();
+                if (isConfigured) loadMessages();
             }
-        };
+        });
 
         // --- FUNCTIONS ---
 
-        // Join Chat
         window.joinChat = () => {
             const input = document.getElementById('usernameInput');
             const name = input.value.trim();
@@ -364,42 +360,52 @@
                 username = name;
                 localStorage.setItem('chat_username', username);
                 document.getElementById('usernameModal').style.display = 'none';
-                if(typeof messagesRef !== 'undefined') loadMessages();
+                if (isConfigured) loadMessages();
             }
         };
 
-        // Send Message
-        window.sendMessage = () => {
+        window.sendMessage = async () => {
+            if (!isConfigured) {
+                alert("Chat is not configured. Please add your Firebase keys.");
+                return;
+            }
+
             const text = messageInput.value.trim();
             if (text === "") return;
 
-            // Simple Spam Prevention
-            if (messageInput.disabled) return;
-            messageInput.disabled = true;
-            setTimeout(() => messageInput.disabled = false, 1000);
-
-            const newMessageRef = push(messagesRef);
-            set(newMessageRef, {
-                username: username,
-                text: text,
-                timestamp: serverTimestamp()
-            });
-
-            messageInput.value = "";
+            // Disable input briefly to prevent spam
+            const btn = document.getElementById('sendBtn');
+            btn.disabled = true;
+            
+            try {
+                const newMessageRef = push(messagesRef);
+                await set(newMessageRef, {
+                    username: username,
+                    text: text,
+                    timestamp: serverTimestamp()
+                });
+                messageInput.value = "";
+                messageInput.focus();
+            } catch (error) {
+                console.error("Send Error:", error);
+                renderSystemMessage("Failed to send: " + error.message, true);
+            } finally {
+                btn.disabled = false;
+            }
         };
 
-        // Load Messages (Real-time Listener)
         function loadMessages() {
+            // Clear old messages if any
+            messageList.innerHTML = ''; 
+            
             onChildAdded(messagesRef, (snapshot) => {
                 const data = snapshot.val();
-                // Only show messages that have a username and text
                 if(data.username && data.text) {
                     renderMessage(data.username, data.text, data.timestamp);
                 }
             });
         }
 
-        // Render Message to DOM
         function renderMessage(user, text, time) {
             const isMe = user === username;
             const div = document.createElement('div');
@@ -421,27 +427,32 @@
             messageList.appendChild(div);
             scrollToBottom();
 
-            // Play Sound if it's not me
             if (!isMe && soundEnabled) {
-                msgSound.play().catch(e => console.log("Audio blocked"));
+                msgSound.play().catch(e => {}); // Catch autoplay blocks
             }
         }
 
-        // Helper: Scroll to bottom
+        window.renderSystemMessage = (text, isError = false) => {
+            const div = document.createElement('div');
+            div.className = `message system ${isError ? 'error' : ''}`;
+            div.innerHTML = `<div class="message-content">${text}</div>`;
+            messageList.appendChild(div);
+            scrollToBottom();
+        };
+
         function scrollToBottom() {
             messageList.scrollTop = messageList.scrollHeight;
         }
 
-        // Helper: Prevent XSS
         function escapeHtml(text) {
             const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
             return text.replace(/[&<>"']/g, function(m) { return map[m]; });
         }
 
-        // UI Toggles
         window.toggleSound = () => {
             soundEnabled = !soundEnabled;
-            document.getElementById('soundBtn').innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+            const btn = document.getElementById('soundBtn');
+            btn.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
         };
 
         window.toggleEmoji = () => {
@@ -459,9 +470,12 @@
             }
         };
 
-        // Enter key to send
+        // Event Listeners
+        document.getElementById('joinBtn').addEventListener('click', window.joinChat);
+        document.getElementById('sendBtn').addEventListener('click', window.sendMessage);
+        
         messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
+            if (e.key === 'Enter') window.sendMessage();
         });
 
     </script>
