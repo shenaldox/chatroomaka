@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global English Class Chatroom</title>
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- RESET & VARIABLES --- */
+        :root {
+            --primary: #4e54c8;
+            --secondary: #8f94fb;
+            --accent: #00d2ff;
+            --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --my-msg-bg: linear-gradient(45deg, #4e54c8, #8f94fb);
+            --other-msg-bg: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            background: var(--bg-gradient);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- CHAT CONTAINER (GLASSMORPHISM) --- */
+        .chat-container {
+            width: 90%;
+            max-width: 500px;
+            height: 85vh;
+            background: rgba(20, 20, 40, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- HEADER --- */
+        .chat-header {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .chat-info h3 { font-size: 1.1rem; color: #fff; }
+        .chat-info span { font-size: 0.8rem; color: var(--accent); display: flex; align-items: center; gap: 5px; }
+        .live-dot { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 10px #00ff88; }
+        
+        .header-actions button {
+            background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; font-size: 1rem; transition: 0.3s; margin-left: 10px;
+        }
+        .header-actions button:hover { color: #fff; }
+
+        /* --- MESSAGES AREA --- */
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        .chat-messages::-webkit-scrollbar { width: 6px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        .chat-messages::-webkit-scrollbar-track { background: transparent; }
+
+        /* Message Bubbles */
+        .message {
+            max-width: 80%;
+            display: flex;
+            flex-direction: column;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            word-wrap: break-word;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .message-content {
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .message-meta {
+            font-size: 0.7rem;
+            margin-top: 4px;
+            opacity: 0.7;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* My Messages */
+        .message.mine { align-self: flex-end; align-items: flex-end; }
+        .message.mine .message-content {
+            background: var(--my-msg-bg);
+            color: #fff;
+            border-bottom-right-radius: 2px;
+            box-shadow: 0 4px 15px rgba(78, 84, 200, 0.3);
+        }
+
+        /* Other Messages */
+        .message.others { align-self: flex-start; align-items: flex-start; }
+        .message.others .message-content {
+            background: var(--other-msg-bg);
+            color: #eee;
+            border-bottom-left-radius: 2px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .sender-name { font-weight: 600; color: var(--accent); font-size: 0.75rem; margin-bottom: 2px; }
+
+        /* System Messages */
+        .message.system {
+            align-self: center;
+            max-width: 100%;
+            text-align: center;
+        }
+        .message.system .message-content {
+            background: rgba(0,0,0,0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #aaa;
+            border: none;
+        }
+
+        /* --- INPUT AREA --- */
+        .chat-input-area {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .emoji-btn {
+            background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; opacity: 0.8; transition: 0.3s;
+        }
+        .emoji-btn:hover { opacity: 1; transform: scale(1.1); }
+
+        input[type="text"] {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 15px;
+            border-radius: 25px;
+            color: #fff;
+            outline: none;
+            font-size: 0.95rem;
+        }
+        input[type="text"]:focus { background: rgba(255,255,255,0.15); border-color: var(--accent); }
+
+        .send-btn {
+            background: var(--accent);
+            color: #0f0c29;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
+        }
+        .send-btn:hover { transform: rotate(-10deg) scale(1.1); }
+        .send-btn i { font-size: 1rem; }
+
+        /* --- MODAL (USERNAME) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%; max-width: 400px;
+            text-align: center;
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
+        }
+        .modal-content h2 { margin-bottom: 20px; color: var(--accent); }
+        .modal-btn {
+            margin-top: 20px; width: 100%; padding: 10px;
+            background: var(--accent); border: none; border-radius: 5px;
+            font-weight: bold; cursor: pointer;
+        }
+
+        /* --- EMOJI PICKER (SIMPLE) --- */
+        .emoji-picker {
+            position: absolute; bottom: 70px; left: 20px;
+            background: rgba(20, 20, 40, 0.95);
+            padding: 10px; border-radius: 10px;
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;
+            display: none; /* Hidden by default */
+            border: 1px solid var(--glass-border);
+        }
+        .emoji-picker span { font-size: 1.5rem; cursor: pointer; text-align: center; }
+        .emoji-picker.show { display: grid; }
+
+        @media (max-width: 480px) {
+            .chat-container { width: 100%; height: 100%; border-radius: 0; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Username Modal -->
+    <div class="modal-overlay" id="usernameModal">
+        <div class="modal-content">
+            <h2>Join the Chat</h2>
+            <p style="margin-bottom: 15px; color: #ccc;">Enter a display name to start chatting with the class.</p>
+            <input type="text" id="usernameInput" placeholder="Your Name (e.g., John)" maxlength="15">
+            <button class="modal-btn" onclick="joinChat()">Enter Chatroom</button>
+        </div>
+    </div>
+
+    <!-- Main Chat Interface -->
+    <div class="chat-container">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="chat-info">
+                <h3>English Class 📚</h3>
+                <span><div class="live-dot"></div> Public Room</span>
+            </div>
+            <div class="header-actions">
+                <button onclick="toggleSound()" id="soundBtn"><i class="fas fa-volume-up"></i></button>
+                <button onclick="clearChat()" title="Clear History"><i class="fas fa-trash-alt"></i></button>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="chat-messages" id="messageList">
+            <!-- Messages will be injected here by JS -->
+            <div class="message system">
+                <div class="message-content">Welcome to the public chatroom! Be respectful.</div>
+            </div>
+        </div>
+
+        <!-- Emoji Picker -->
+        <div class="emoji-picker" id="emojiPicker">
+            <span onclick="addEmoji('😊')">😊</span>
+            <span onclick="addEmoji('👍')">👍</span>
+            <span onclick="addEmoji('❤️')">❤️</span>
+            <span onclick="addEmoji('🎓')">🎓</span>
+            <span onclick="addEmoji('🤔')">🤔</span>
+            <span onclick="addEmoji('😂')">😂</span>
+            <span onclick="addEmoji('😮')">😮</span>
+            <span onclick="addEmoji('👋')">👋</span>
+            <span onclick="addEmoji('✨')">✨</span>
+            <span onclick="addEmoji('🔥')">🔥</span>
+        </div>
+
+        <!-- Input Area -->
+        <div class="chat-input-area">
+            <button class="emoji-btn" onclick="toggleEmoji()"><i class="far fa-smile"></i></button>
+            <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off">
+            <button class="send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- Sound Effect (Base64) -->
+    <!-- A simple pop sound -->
+    <audio id="msgSound" src="data:audio/wav;base64,UklGRl9vT1BXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"></audio>
+
+    <!-- FIREBASE SDKs -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getDatabase, ref, push, onChildAdded, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+        // ==========================================
+        // 🔥 CONFIGURATION (REPLACE THIS SECTION)
+        // ==========================================
+        const firebaseConfig = {
+            // PASTE YOUR FIREBASE CONFIG HERE
+            // Example:
+            // apiKey: "AIzaSy...",
+            // authDomain: "your-project.firebaseapp.com",
+            // databaseURL: "https://your-project-default-rtdb.firebaseio.com",
+            // projectId: "your-project",
+            // storageBucket: "your-project.appspot.com",
+            // messagingSenderId: "...",
+            // appId: "..."
+        };
+        
+        // Fallback config to prevent crash before setup (Demo Mode)
+        // REMOVE THESE LINES when you paste your real config
+        if(!firebaseConfig.apiKey) {
+           console.warn("Firebase not configured. Chat is in demo mode (local only).");
+        } else {
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase(app);
+            const messagesRef = ref(db, 'messages');
+        }
+
+        // --- GLOBAL VARIABLES ---
+        let username = localStorage.getItem('chat_username');
+        let soundEnabled = true;
+        const messageList = document.getElementById('messageList');
+        const messageInput = document.getElementById('messageInput');
+        const msgSound = document.getElementById('msgSound');
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            if (username) {
+                document.getElementById('usernameModal').style.display = 'none';
+                if(typeof messagesRef !== 'undefined') loadMessages();
+            }
+        };
+
+        // --- FUNCTIONS ---
+
+        // Join Chat
+        window.joinChat = () => {
+            const input = document.getElementById('usernameInput');
+            const name = input.value.trim();
+            if (name) {
+                username = name;
+                localStorage.setItem('chat_username', username);
+                document.getElementById('usernameModal').style.display = 'none';
+                if(typeof messagesRef !== 'undefined') loadMessages();
+            }
+        };
+
+        // Send Message
+        window.sendMessage = () => {
+            const text = messageInput.value.trim();
+            if (text === "") return;
+
+            // Simple Spam Prevention
+            if (messageInput.disabled) return;
+            messageInput.disabled = true;
+            setTimeout(() => messageInput.disabled = false, 1000);
+
+            const newMessageRef = push(messagesRef);
+            set(newMessageRef, {
+                username: username,
+                text: text,
+                timestamp: serverTimestamp()
+            });
+
+            messageInput.value = "";
+        };
+
+        // Load Messages (Real-time Listener)
+        function loadMessages() {
+            onChildAdded(messagesRef, (snapshot) => {
+                const data = snapshot.val();
+                // Only show messages that have a username and text
+                if(data.username && data.text) {
+                    renderMessage(data.username, data.text, data.timestamp);
+                }
+            });
+        }
+
+        // Render Message to DOM
+        function renderMessage(user, text, time) {
+            const isMe = user === username;
+            const div = document.createElement('div');
+            div.className = `message ${isMe ? 'mine' : 'others'}`;
+            
+            let timeString = "";
+            if (time) {
+                timeString = new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            div.innerHTML = `
+                ${!isMe ? `<span class="sender-name">${escapeHtml(user)}</span>` : ''}
+                <div class="message-content">
+                    ${escapeHtml(text)}
+                </div>
+                <div class="message-meta">${timeString}</div>
+            `;
+
+            messageList.appendChild(div);
+            scrollToBottom();
+
+            // Play Sound if it's not me
+            if (!isMe && soundEnabled) {
+                msgSound.play().catch(e => console.log("Audio blocked"));
+            }
+        }
+
+        // Helper: Scroll to bottom
+        function scrollToBottom() {
+            messageList.scrollTop = messageList.scrollHeight;
+        }
+
+        // Helper: Prevent XSS
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        // UI Toggles
+        window.toggleSound = () => {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundBtn').innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+        };
+
+        window.toggleEmoji = () => {
+            document.getElementById('emojiPicker').classList.toggle('show');
+        };
+
+        window.addEmoji = (emoji) => {
+            messageInput.value += emoji;
+            messageInput.focus();
+        };
+
+        window.clearChat = () => {
+            if(confirm("Clear chat history? (Visible only to you)")) {
+                messageList.innerHTML = '';
+            }
+        };
+
+        // Enter key to send
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+    </script>
+</body>
+</html>
