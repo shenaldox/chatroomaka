@@ -3,21 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global English Class Chatroom</title>
-    <!-- Icons -->
+    <title>Tutor Chatroom</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <style>
-        /* --- CSS (Same as before, kept for consistency) --- */
         :root {
             --primary: #4e54c8;
-            --secondary: #8f94fb;
             --accent: #00d2ff;
             --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(20, 20, 40, 0.7);
             --my-msg-bg: linear-gradient(45deg, #4e54c8, #8f94fb);
             --other-msg-bg: rgba(255, 255, 255, 0.1);
         }
@@ -28,8 +23,6 @@
             height: 100vh;
             width: 100vw;
             background: var(--bg-gradient);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -37,441 +30,305 @@
             color: #fff;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
         .chat-container {
-            width: 90%;
+            width: 95%;
             max-width: 500px;
             height: 85vh;
-            background: rgba(20, 20, 40, 0.6);
+            background: var(--glass-bg);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
 
+        /* HEADER */
         .chat-header {
-            padding: 15px 20px;
-            background: rgba(0, 0, 0, 0.2);
-            border-bottom: 1px solid var(--glass-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 10;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between; align-items: center;
         }
+        .chat-info h3 { font-size: 1.1rem; }
+        .live-dot { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; display: inline-block; margin-right: 5px; }
 
-        .chat-info h3 { font-size: 1.1rem; color: #fff; }
-        .chat-info span { font-size: 0.8rem; color: var(--accent); display: flex; align-items: center; gap: 5px; }
-        .live-dot { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 10px #00ff88; }
-        
-        .header-actions button {
-            background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; font-size: 1rem; transition: 0.3s; margin-left: 10px;
-        }
-        .header-actions button:hover { color: #fff; }
-
+        /* MESSAGES */
         .chat-messages {
             flex: 1;
             padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            scroll-behavior: smooth;
+            gap: 10px;
         }
-
-        .chat-messages::-webkit-scrollbar { width: 6px; }
-        .chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-        .chat-messages::-webkit-scrollbar-track { background: transparent; }
-
+        
         .message {
             max-width: 80%;
-            display: flex;
-            flex-direction: column;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            word-wrap: break-word;
+            display: flex; flex-direction: column;
+            animation: slideIn 0.3s ease;
         }
-
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(0.9) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .message-content {
             padding: 10px 15px;
             border-radius: 15px;
             font-size: 0.95rem;
-            line-height: 1.4;
-            position: relative;
-        }
-
-        .message-meta {
-            font-size: 0.7rem;
-            margin-top: 4px;
-            opacity: 0.7;
-            display: flex;
-            gap: 8px;
-            align-items: center;
+            word-wrap: break-word;
         }
 
         .message.mine { align-self: flex-end; align-items: flex-end; }
         .message.mine .message-content {
-            background: var(--my-msg-bg);
-            color: #fff;
+            background: var(--my-msg-bg); color: #fff;
             border-bottom-right-radius: 2px;
-            box-shadow: 0 4px 15px rgba(78, 84, 200, 0.3);
         }
 
         .message.others { align-self: flex-start; align-items: flex-start; }
         .message.others .message-content {
-            background: var(--other-msg-bg);
-            color: #eee;
+            background: var(--other-msg-bg); color: #eee;
             border-bottom-left-radius: 2px;
             border: 1px solid rgba(255,255,255,0.05);
         }
-        .sender-name { font-weight: 600; color: var(--accent); font-size: 0.75rem; margin-bottom: 2px; }
-
-        .message.system {
-            align-self: center;
-            max-width: 100%;
+        
+        .sender-name { font-size: 0.75rem; color: var(--accent); margin-bottom: 2px; font-weight: 600; }
+        .message-meta { font-size: 0.7rem; opacity: 0.6; margin-top: 2px; }
+        
+        /* ERROR MESSAGE STYLE */
+        .message.error .message-content { 
+            background: rgba(255, 50, 50, 0.2); 
+            color: #ff9999; 
+            border: 1px solid red; 
             text-align: center;
         }
-        .message.system .message-content {
-            background: rgba(0,0,0,0.3);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            color: #aaa;
-            border: none;
-        }
-        .message.error .message-content {
-            background: rgba(255, 50, 50, 0.2);
-            color: #ffadad;
-            border: 1px solid rgba(255, 50, 50, 0.3);
-        }
 
+        /* INPUT AREA */
         .chat-input-area {
-            padding: 15px 20px;
-            background: rgba(0, 0, 0, 0.2);
-            border-top: 1px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            position: relative;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            display: flex; gap: 10px;
+            border-top: 1px solid rgba(255,255,255,0.05);
         }
-
-        .emoji-btn {
-            background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; opacity: 0.8; transition: 0.3s;
-        }
-        .emoji-btn:hover { opacity: 1; transform: scale(1.1); }
-
         input[type="text"] {
             flex: 1;
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.1);
-            padding: 12px 15px;
-            border-radius: 25px;
-            color: #fff;
-            outline: none;
-            font-size: 0.95rem;
+            padding: 12px; border-radius: 25px;
+            color: #fff; outline: none;
         }
-        input[type="text"]:focus { background: rgba(255,255,255,0.15); border-color: var(--accent); }
-
         .send-btn {
-            background: var(--accent);
-            color: #0f0c29;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
+            background: var(--accent); border: none;
+            width: 45px; height: 45px; border-radius: 50%;
+            color: #000; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
         }
-        .send-btn:hover { transform: rotate(-10deg) scale(1.1); }
-        .send-btn i { font-size: 1rem; }
+        .send-btn:hover { transform: scale(1.1); }
 
+        /* MODAL */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-            z-index: 100;
-            display: flex; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
+            z-index: 1000; display: flex; justify-content: center; align-items: center;
         }
         .modal-content {
-            background: #1a1a2e;
-            padding: 30px;
-            border-radius: 15px;
-            width: 90%; max-width: 400px;
-            text-align: center;
+            background: #1a1a2e; padding: 30px; border-radius: 15px;
+            width: 90%; max-width: 350px; text-align: center;
             border: 1px solid var(--accent);
-            box-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
         }
-        .modal-content h2 { margin-bottom: 20px; color: var(--accent); }
+        .modal-content input {
+            width: 100%; padding: 12px; margin: 15px 0;
+            border-radius: 5px; border: none; text-align: center;
+        }
         .modal-btn {
-            margin-top: 20px; width: 100%; padding: 10px;
-            background: var(--accent); border: none; border-radius: 5px;
-            font-weight: bold; cursor: pointer;
+            background: var(--accent); border: none; padding: 10px 20px;
+            border-radius: 5px; width: 100%; font-weight: bold; cursor: pointer;
         }
-
-        .emoji-picker {
-            position: absolute; bottom: 70px; left: 20px;
-            background: rgba(20, 20, 40, 0.95);
-            padding: 10px; border-radius: 10px;
-            display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;
-            display: none;
-            border: 1px solid var(--glass-border);
-        }
-        .emoji-picker span { font-size: 1.5rem; cursor: pointer; text-align: center; }
-        .emoji-picker.show { display: grid; }
 
         @media (max-width: 480px) {
-            .chat-container { width: 100%; height: 100%; border-radius: 0; border: none; }
+            .chat-container { width: 100%; height: 100%; border-radius: 0; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Username Modal -->
-    <div class="modal-overlay" id="usernameModal">
+    <!-- JOIN MODAL -->
+    <div class="modal-overlay" id="joinModal">
         <div class="modal-content">
-            <h2>Join the Chat</h2>
-            <p style="margin-bottom: 15px; color: #ccc;">Enter a display name to start chatting.</p>
-            <input type="text" id="usernameInput" placeholder="Your Name" maxlength="15">
-            <button class="modal-btn" id="joinBtn">Enter Chatroom</button>
+            <h2>Join Chat</h2>
+            <p>Enter your nickname</p>
+            <input type="text" id="usernameInput" placeholder="Ex: Alex" maxlength="12">
+            <button class="modal-btn" id="enterBtn">Enter Room</button>
         </div>
     </div>
 
-    <!-- Main Chat Interface -->
+    <!-- CHAT UI -->
     <div class="chat-container">
         <div class="chat-header">
             <div class="chat-info">
-                <h3>English Class 📚</h3>
-                <span><div class="live-dot"></div> Public Room</span>
+                <h3><span class="live-dot"></span>English Chat</h3>
             </div>
-            <div class="header-actions">
-                <button onclick="toggleSound()" id="soundBtn"><i class="fas fa-volume-up"></i></button>
-                <button onclick="clearChat()" title="Clear History"><i class="fas fa-trash-alt"></i></button>
+            <div>
+                <button onclick="clearHistory()" style="background:none; border:none; color:#aaa; cursor:pointer;"><i class="fas fa-trash"></i></button>
             </div>
         </div>
 
         <div class="chat-messages" id="messageList">
-            <div class="message system">
-                <div class="message-content">Welcome! Please configure Firebase to chat.</div>
-            </div>
-        </div>
-
-        <div class="emoji-picker" id="emojiPicker">
-            <span onclick="addEmoji('😊')">😊</span>
-            <span onclick="addEmoji('👍')">👍</span>
-            <span onclick="addEmoji('❤️')">❤️</span>
-            <span onclick="addEmoji('🎓')">🎓</span>
-            <span onclick="addEmoji('🤔')">🤔</span>
-            <span onclick="addEmoji('😂')">😂</span>
-            <span onclick="addEmoji('😮')">😮</span>
-            <span onclick="addEmoji('👋')">👋</span>
-            <span onclick="addEmoji('✨')">✨</span>
-            <span onclick="addEmoji('🔥')">🔥</span>
+            <!-- Messages appear here -->
         </div>
 
         <div class="chat-input-area">
-            <button class="emoji-btn" onclick="toggleEmoji()"><i class="far fa-smile"></i></button>
-            <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off">
+            <input type="text" id="messageInput" placeholder="Type a message...">
             <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
-    <!-- FIREBASE SDKs -->
+    <!-- FIREBASE SDK -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getDatabase, ref, push, set, onChildAdded, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
         // ==========================================
-        // 🔥 PASTE YOUR FIREBASE CONFIG HERE
+        // 🔥 YOUR SPECIFIC CONFIGURATION
         // ==========================================
         const firebaseConfig = {
-  apiKey: "AIzaSyB9Hi_vtdX6LHDXIRQwNogiJE57yndceyo",
-  authDomain: "chatroom-20fa8.firebaseapp.com",
-  databaseURL: "https://chatroom-20fa8-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "chatroom-20fa8",
-  storageBucket: "chatroom-20fa8.firebasestorage.app",
-  messagingSenderId: "651290323110",
-  appId: "1:651290323110:web:d9a6f9d1537a8466e06c67",
-  measurementId: "G-9WB7V9QE9P"
+            apiKey: "AIzaSyBmDLp9TmdF30hIWnEifjLHXKTp7QlLQzc",
+            authDomain: "chetroom-43e6a.firebaseapp.com",
+            databaseURL: "https://chetroom-43e6a-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "chetroom-43e6a",
+            storageBucket: "chetroom-43e6a.firebasestorage.app",
+            messagingSenderId: "301349839212",
+            appId: "1:301349839212:web:161fa60ff9ff467734d349",
+            measurementId: "G-X6689JWR2G"
         };
 
         // --- GLOBAL VARIABLES ---
+        let app, db, messagesRef;
         let username = localStorage.getItem('chat_username');
-        let soundEnabled = true;
         const messageList = document.getElementById('messageList');
         const messageInput = document.getElementById('messageInput');
-        const msgSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.m4a'); // Simple pop sound
+        const joinModal = document.getElementById('joinModal');
 
-        // --- INITIALIZATION & LOGIC ---
-        let app, db, messagesRef;
-
-        function initFirebase() {
-            // Check if config is valid
-            if (firebaseConfig.apiKey === "AIzaSyB9Hi_vtdX6LHDXIRQwNogiJE57yndceyo") {
-                renderSystemMessage("⚠️ Error: Please edit the code and replace 'REPLACE_ME' with your actual Firebase Config keys.", true);
-                return false;
-            }
-
+        // --- INITIALIZATION ---
+        function init() {
             try {
+                // Initialize Firebase
                 app = initializeApp(firebaseConfig);
                 db = getDatabase(app);
                 messagesRef = ref(db, 'messages');
-                return true;
+                console.log("Firebase initialized successfully");
+
+                // Check if user already has a username
+                if (username) {
+                    joinModal.style.display = 'none';
+                    loadMessages();
+                } else {
+                    // Show modal
+                    joinModal.style.display = 'flex';
+                }
+
             } catch (error) {
-                renderSystemMessage("⚠️ Firebase Error: " + error.message, true);
-                console.error(error);
-                return false;
+                console.error("Firebase Init Error:", error);
+                showError("System Error: " + error.message);
             }
         }
-
-        // Check Init on Load
-        const isConfigured = initFirebase();
-
-        window.addEventListener('DOMContentLoaded', () => {
-            if (username) {
-                document.getElementById('usernameModal').style.display = 'none';
-                if (isConfigured) loadMessages();
-            }
-        });
 
         // --- FUNCTIONS ---
 
+        // 1. Join Chat (Button Click)
         window.joinChat = () => {
             const input = document.getElementById('usernameInput');
             const name = input.value.trim();
-            if (name) {
+            
+            if (name.length > 0) {
                 username = name;
                 localStorage.setItem('chat_username', username);
-                document.getElementById('usernameModal').style.display = 'none';
-                if (isConfigured) loadMessages();
+                joinModal.style.display = 'none';
+                loadMessages();
+            } else {
+                alert("Please enter a name");
             }
         };
 
-        window.sendMessage = async () => {
-            if (!isConfigured) {
-                alert("Chat is not configured. Please add your Firebase keys.");
-                return;
-            }
-
-            const text = messageInput.value.trim();
-            if (text === "") return;
-
-            // Disable input briefly to prevent spam
-            const btn = document.getElementById('sendBtn');
-            btn.disabled = true;
-            
-            try {
-                const newMessageRef = push(messagesRef);
-                await set(newMessageRef, {
-                    username: username,
-                    text: text,
-                    timestamp: serverTimestamp()
-                });
-                messageInput.value = "";
-                messageInput.focus();
-            } catch (error) {
-                console.error("Send Error:", error);
-                renderSystemMessage("Failed to send: " + error.message, true);
-            } finally {
-                btn.disabled = false;
-            }
-        };
-
+        // 2. Load Messages (Real-time Listener)
         function loadMessages() {
-            // Clear old messages if any
-            messageList.innerHTML = ''; 
+            console.log("Loading messages...");
             
             onChildAdded(messagesRef, (snapshot) => {
                 const data = snapshot.val();
-                if(data.username && data.text) {
+                if (data) {
                     renderMessage(data.username, data.text, data.timestamp);
                 }
+            }, (error) => {
+                // CATCH PERMISSION ERRORS
+                console.error("Database Read Error:", error);
+                showError("Permission Denied. Update Database Rules to Public!");
             });
         }
 
+        // 3. Send Message
+        window.sendMessage = () => {
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            push(messagesRef, {
+                username: username,
+                text: text,
+                timestamp: serverTimestamp()
+            }).then(() => {
+                messageInput.value = '';
+            }).catch((error) => {
+                console.error("Send Error:", error);
+                showError("Failed to send: " + error.message);
+            });
+        };
+
+        // 4. Render Message to DOM
         function renderMessage(user, text, time) {
             const isMe = user === username;
             const div = document.createElement('div');
             div.className = `message ${isMe ? 'mine' : 'others'}`;
-            
-            let timeString = "";
+
+            let timeStr = "";
             if (time) {
-                timeString = new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                timeStr = new Date(time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             }
 
             div.innerHTML = `
-                ${!isMe ? `<span class="sender-name">${escapeHtml(user)}</span>` : ''}
-                <div class="message-content">
-                    ${escapeHtml(text)}
-                </div>
-                <div class="message-meta">${timeString}</div>
+                ${!isMe ? `<div class="sender-name">${escapeHtml(user)}</div>` : ''}
+                <div class="message-content">${escapeHtml(text)}</div>
+                <div class="message-meta">${timeStr}</div>
             `;
 
             messageList.appendChild(div);
-            scrollToBottom();
-
-            if (!isMe && soundEnabled) {
-                msgSound.play().catch(e => {}); // Catch autoplay blocks
-            }
-        }
-
-        window.renderSystemMessage = (text, isError = false) => {
-            const div = document.createElement('div');
-            div.className = `message system ${isError ? 'error' : ''}`;
-            div.innerHTML = `<div class="message-content">${text}</div>`;
-            messageList.appendChild(div);
-            scrollToBottom();
-        };
-
-        function scrollToBottom() {
             messageList.scrollTop = messageList.scrollHeight;
         }
 
+        // 5. Helper: Show Error in Chat
+        function showError(msg) {
+            const div = document.createElement('div');
+            div.className = 'message error';
+            div.innerHTML = `<div class="message-content">⚠️ ${msg}</div>`;
+            messageList.appendChild(div);
+            messageList.scrollTop = messageList.scrollHeight;
+        }
+
+        // 6. Helper: XSS Protection
         function escapeHtml(text) {
             const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
             return text.replace(/[&<>"']/g, function(m) { return map[m]; });
         }
 
-        window.toggleSound = () => {
-            soundEnabled = !soundEnabled;
-            const btn = document.getElementById('soundBtn');
-            btn.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+        window.clearHistory = () => {
+            messageList.innerHTML = '';
         };
 
-        window.toggleEmoji = () => {
-            document.getElementById('emojiPicker').classList.toggle('show');
-        };
+        // --- EVENT LISTENERS ---
+        window.addEventListener('DOMContentLoaded', () => {
+            init();
+        });
 
-        window.addEmoji = (emoji) => {
-            messageInput.value += emoji;
-            messageInput.focus();
-        };
-
-        window.clearChat = () => {
-            if(confirm("Clear chat history? (Visible only to you)")) {
-                messageList.innerHTML = '';
-            }
-        };
-
-        // Event Listeners
-        document.getElementById('joinBtn').addEventListener('click', window.joinChat);
+        document.getElementById('enterBtn').addEventListener('click', window.joinChat);
         document.getElementById('sendBtn').addEventListener('click', window.sendMessage);
         
         messageInput.addEventListener('keypress', (e) => {
